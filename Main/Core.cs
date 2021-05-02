@@ -18,6 +18,7 @@ namespace BroodyHen.Main
     {
         public static Core Plugin { get; private set; }
 
+        private bool isAnyHovered;
         private CachedValue<bool> ingameUIisVisible;
         private static readonly ConcurrentDictionary<NormalInventoryItem, RectangleF> incubatedItems =
             new ConcurrentDictionary<NormalInventoryItem, RectangleF>();
@@ -35,7 +36,8 @@ namespace BroodyHen.Main
             InventoryIndex.LWeapon,
             InventoryIndex.RWeapon,
             InventoryIndex.LWeaponSwap,
-            InventoryIndex.RWeaponSwap
+            InventoryIndex.RWeaponSwap,
+            InventoryIndex.PlayerInventory
         };
 
         public override void OnLoad()
@@ -71,6 +73,7 @@ namespace BroodyHen.Main
         public override void Render()
         {
             if (ingameUIisVisible.Value) return;
+            if (!Settings.LablesWhileHovered && isAnyHovered) return;
 
             foreach (var item in incubatedItems.Keys)
                 Graphics.DrawFrame(incubatedItems[item], Color.YellowGreen, 4);
@@ -82,11 +85,22 @@ namespace BroodyHen.Main
             var _incubatedItemsList = new List<NormalInventoryItem>();
 
             if (_inventories.IsVisibleLocal)
+            {
                 foreach (var index in slots)
+                {
+                    if (_inventories[index].HoverItem != null
+                        || _inventories[index].CursorHoverInventory)
+                    {
+                        isAnyHovered = true;
+                    }
+
+                    if (index == InventoryIndex.PlayerInventory) continue;
+
                     _incubatedItemsList.AddRange(_inventories[index].VisibleInventoryItems
-                    .Where(i => i?.Item?.GetComponent<Mods>()?.IncubatorName == ""
-                                || i?.Item?.GetComponent<Mods>()?.IncubatorName == null)
+                    .Where(i => i?.Item?.GetComponent<Mods>()?.IncubatorKills == 0)
                     );
+                }
+            }
 
             foreach (var key in incubatedItems.Keys.Where(k => !_incubatedItemsList.Contains(k)))
                 incubatedItems.TryRemove(key, out _);

@@ -16,10 +16,12 @@ namespace BroodyHen.Main
             Enable = new ToggleNode(false);
             MultiThreading = new ToggleNode(true);
             Debug = new ToggleNode(false);
+            LablesWhileHovered = new ToggleNode(false);
         }
 
         [Menu("Enable")] public ToggleNode Enable { get; set; }
         [Menu("Enable multithreading")] public ToggleNode MultiThreading { get; set; }
         [Menu("Debug mode")] public ToggleNode Debug { get; set; }
+        [Menu("Draw labels in inventory while any item is hovered?")] public ToggleNode LablesWhileHovered { get; set; }
     }
 }
