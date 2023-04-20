@@ -1,4 +1,4 @@
-﻿using ExileCore;
+using ExileCore;
 using ExileCore.PoEMemory.Components;
 using ExileCore.PoEMemory.Elements;
 using ExileCore.PoEMemory.Elements.InventoryElements;
@@ -35,8 +35,6 @@ namespace BroodyHen.Main
             InventoryIndex.RRing,
             InventoryIndex.LWeapon,
             InventoryIndex.RWeapon,
-            InventoryIndex.LWeaponSwap,
-            InventoryIndex.RWeaponSwap,
             InventoryIndex.PlayerInventory
         };
 
@@ -97,7 +95,7 @@ namespace BroodyHen.Main
                     if (index == InventoryIndex.PlayerInventory) continue;
 
                     _incubatedItemsList.AddRange(_inventories[index].VisibleInventoryItems
-                    .Where(i => i?.Item?.GetComponent<Mods>()?.IncubatorKills == 0)
+                    .Where(i => i?.Item?.GetComponent<Mods>()?.IncubatorName == null)
                     );
                 }
             }
