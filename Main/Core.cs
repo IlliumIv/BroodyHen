@@ -19,7 +19,6 @@ namespace BroodyHen.Main
         public static Core Plugin { get; private set; }
 
         private bool isAnyHovered;
-        private CachedValue<bool> ingameUIisVisible;
         private static readonly ConcurrentDictionary<NormalInventoryItem, RectangleF> incubatedItems =
             new ConcurrentDictionary<NormalInventoryItem, RectangleF>();
 
@@ -46,14 +45,6 @@ namespace BroodyHen.Main
 
         public override bool Initialise()
         {
-            var _ingameUI = GameController.IngameState.IngameUi;
-            ingameUIisVisible = new TimeCache<bool>(() =>
-            {
-                return _ingameUI.SyndicatePanel.IsVisibleLocal
-                       || _ingameUI.TreePanel.IsVisibleLocal
-                       || _ingameUI.Atlas.IsVisibleLocal;
-            }, 250);
-
             Plugin = this;
             return true;
         }
@@ -70,7 +61,7 @@ namespace BroodyHen.Main
 
         public override void Render()
         {
-            if (ingameUIisVisible.Value) return;
+            if (!GameController.Game.IngameState.IngameUi.InventoryPanel.IsVisibleLocal) return;
             if (!Settings.LablesWhileHovered && isAnyHovered) return;
 
             foreach (var item in incubatedItems.Keys)
@@ -84,19 +75,14 @@ namespace BroodyHen.Main
 
             if (_inventories.IsVisibleLocal)
             {
+                isAnyHovered = false;
                 foreach (var index in slots)
                 {
-                    if (_inventories[index].HoverItem != null
-                        || _inventories[index].CursorHoverInventory)
-                    {
-                        isAnyHovered = true;
-                    }
-
+                    if (_inventories[index].HoverItem != null) isAnyHovered = true;
                     if (index == InventoryIndex.PlayerInventory) continue;
 
                     _incubatedItemsList.AddRange(_inventories[index].VisibleInventoryItems
-                    .Where(i => i?.Item?.GetComponent<Mods>()?.IncubatorName == null)
-                    );
+                        .Where(i => i?.Item?.GetComponent<Mods>()?.IncubatorName == null));
                 }
             }
 
@@ -106,11 +92,8 @@ namespace BroodyHen.Main
             foreach (var item in _incubatedItemsList)
             {
                 if (Settings.Debug) LogMessage($"{Name}: {item.Item.Metadata}");
-
                 var _rectangle = item?.GetClientRect();
-
                 if (_rectangle == null) continue;
-
                 incubatedItems.AddOrUpdate(item, (RectangleF)_rectangle, (key, oldLValue) => (RectangleF)_rectangle);
             }
         }
