@@ -18,6 +18,7 @@ namespace BroodyHen.Main
     {
         public static Core Plugin { get; private set; }
 
+        private const int equippedInventoryIndex = 3;
         private bool isAnyHovered;
         private static readonly ConcurrentDictionary<NormalInventoryItem, RectangleF> incubatedItems =
             new ConcurrentDictionary<NormalInventoryItem, RectangleF>();
@@ -61,7 +62,9 @@ namespace BroodyHen.Main
 
         public override void Render()
         {
-            if (!GameController.Game.IngameState.IngameUi.InventoryPanel.IsVisibleLocal) return;
+            var _inventories = GameController.Game.IngameState.IngameUi.InventoryPanel;
+            if (_inventories.Children.Count < equippedInventoryIndex + 1 ||
+                !_inventories.Children[equippedInventoryIndex].IsVisibleLocal) return;
             if (!Settings.LablesWhileHovered && isAnyHovered) return;
 
             foreach (var item in incubatedItems.Keys)
@@ -73,7 +76,7 @@ namespace BroodyHen.Main
             var _inventories = GameController.Game.IngameState.IngameUi.InventoryPanel;
             var _incubatedItemsList = new List<NormalInventoryItem>();
 
-            if (_inventories.IsVisibleLocal)
+            if (_inventories.Children.Count > equippedInventoryIndex && _inventories.Children[equippedInventoryIndex].IsVisibleLocal)
             {
                 isAnyHovered = false;
                 foreach (var index in slots)
